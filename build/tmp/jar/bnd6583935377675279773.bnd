@@ -1,0 +1,5 @@
+#Sun Mar 11 14:30:05 EDT 2018
+Bundle-Activator=com.dotmarketing.osgi.servlet.Activator
+Export-Package=\n\t\t\t\torg.osgi.service.http.context,\n\t\t\t\torg.pmw.*\n\n\t\t\t
+Import-Package=\n\t\t\t\t\tjavax.servlet.*,\n\t\t\t\t\torg.osgi.service.http.context,\n\t\t\t\t\torg.osgi.*,\n\t\t\t\t\tcom.dotmarketing.util.*,\n\t\t\t\t\tcom.dotmarketing.osgi.*,\n\t\t\t\t\tcom.dotmarketing.filters.*\n\n\t\t\t\t
+DynamicImport-Package=*
