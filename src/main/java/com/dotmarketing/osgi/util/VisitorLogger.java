@@ -12,8 +12,10 @@ import com.dotmarketing.portlets.languagesmanager.model.Language;
 import com.dotmarketing.portlets.personas.model.IPersona;
 import com.dotmarketing.util.WebKeys;
 
-import java.io.StringWriter;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,18 +24,34 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.pmw.tinylog.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.base.Splitter;
+
 public class VisitorLogger {
-    GeoIp2CityDbUtil geo = GeoIp2CityDbUtil.getInstance();
+    
+    static GeoIp2CityDbUtil geo = GeoIp2CityDbUtil.getInstance();
+    static ObjectMapper mapper;
+    private ObjectMapper mapper() {
+        if(mapper==null) {
+            ObjectMapper newMapper = new ObjectMapper();
+            newMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            mapper=newMapper;
+        }
+        return mapper;
+    }
 
 
-    public void log(final HttpServletRequest request, final HttpServletResponse response)  {
+
+    public void log(final HttpServletRequest request, final HttpServletResponse response) throws JsonProcessingException {
 
 
         if (!shouldLog(request, response)) {
             return;
         }
-        StringWriter sw = new StringWriter();
 
+        final Map<String, Object> map = new HashMap<>();
         // file or page
         final Identifier asset = (request.getAttribute("idInode") != null) ? (Identifier) request.getAttribute("idInode")
                 : (Identifier) request.getAttribute(Constants.CMS_FILTER_IDENTITY);
@@ -41,80 +59,39 @@ public class VisitorLogger {
         final Optional<String> content = Optional.ofNullable((String) request.getAttribute(WebKeys.WIKI_CONTENTLET));
 
         final Language lang = WebAPILocator.getLanguageWebAPI().getLanguage(request);
-        Visitor visitor = new VisitorAPIImpl().getVisitor(request).get();
-        GeolocationProvider geo = new GeoIp2Geolocation(visitor);
-        IPersona persona = visitor.getPersona();
-        UUID dmid = visitor.getDmid();
-        String device = visitor.getDevice();
-        List<AccruedTag> tags = visitor.getTags();
-        String agent = request.getHeader("user-agent");
-
-        sw.append("ts:")
-            .append(String.valueOf(System.currentTimeMillis()))
-
-            .append('\t')
-            .append("request:")
-            .append(request.getRequestURI())
-
-            .append('\t')
-            .append("uri:")
-            .append(request.getRequestURI())
-
-            .append('\t')
-            .append("referer:")
-            .append(request.getHeader("referer"))
-
-            .append('\t')
-            .append("host:")
-            .append(request.getHeader("host"))
-
-            .append('\t')
-            .append("assetId:")
-            .append((asset != null) ? asset.getId() : "ukn")
-
-            .append('\t')
-            .append("contentId:")
-            .append(content.orElse("ukn"))
-
-            .append('\t')
-            .append("device:")
-            .append(device)
-
-            .append('\t')
-            .append("agent:")
-            .append(agent)
-
-            .append('\t')
-            .append("persona:")
-            .append((persona != null) ? persona.getKeyTag() : "ukn")
-
-            .append('\t')
-            .append("city:")
-            .append(geo.getCity())
-
-            .append('\t')
-            .append("lang:")
-            .append(lang.toString())
-
-            .append('\t')
-            .append("dmid:")
-            .append(dmid.toString())
-
-            .append('\t')
-            .append("latLong:")
-            .append(geo.getLatLong())
-
-            .append('\t')
-            .append("tags:")
-            .append(tags.toString());
-        doLog(sw);
+        final Visitor visitor = new VisitorAPIImpl().getVisitor(request).get();
+        final GeolocationProvider geo = new GeoIp2Geolocation(visitor);
+        final IPersona persona = visitor.getPersona();
+        final UUID dmid = visitor.getDmid();
+        final String device = visitor.getDevice();
+        final String agent = request.getHeader("user-agent");
+        final List<AccruedTag> tags = visitor.getTags();
+        final Map<String, String> params = (request.getQueryString()!=null) ?  Splitter.on('&').trimResults().withKeyValueSeparator("=").split(request.getQueryString()) : Collections.emptyMap();
 
 
 
-    }
 
-    public void destroy() {
-        System.out.println("visitor logger stopped");
+        map.put("ts", System.currentTimeMillis());
+        map.put("request", request.getRequestURI());
+        map.put("query", params);
+        map.put("referer", request.getHeader("referer"));
+        map.put("host", request.getHeader("host"));
+        map.put("assetId", (asset != null) ? asset.getId() : "ukn");
+        map.put("contentId", content.orElse("ukn"));
+        map.put("device", device);
+        map.put("agent", agent);
+        map.put("persona", (persona != null) ? persona.getKeyTag() : "ukn");
+        map.put("city", geo.getCity());
+        map.put("country", geo.getCountryCode());
+        map.put("lang", lang.toString());
+        map.put("dmid", dmid.toString());
+        map.put("latLong", geo.getLatLong());
+        map.put("tags", tags);
+        map.put("params", params);
+        map.put("pagesViewed", visitor.getNumberPagesViewed());
+
+
+        doLog(mapper().writeValueAsString(map));
     }
 
     private void doLog(Object message) {
@@ -123,12 +100,8 @@ public class VisitorLogger {
 
 
     private boolean shouldLog(HttpServletRequest request, HttpServletResponse response) {
-
         return 500 != response.getStatus() && new VisitorAPIImpl().getVisitor(request, false).isPresent();
-
-
     }
-
 
 
 }

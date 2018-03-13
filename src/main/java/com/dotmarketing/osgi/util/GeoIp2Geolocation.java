@@ -75,6 +75,7 @@ public class GeoIp2Geolocation implements Serializable, GeolocationProvider {
         try {
             if (latitudeFld == null) {
                 latitudeFld = Location.class.getDeclaredField("latitude");
+                latitudeFld.setAccessible(true);
             }
             return (Double) latitudeFld.get(this.location);
         } catch (Exception e) {
@@ -86,6 +87,7 @@ public class GeoIp2Geolocation implements Serializable, GeolocationProvider {
         try {
             if (longitudeFld == null) {
                 longitudeFld = Location.class.getDeclaredField("longitude");
+                longitudeFld.setAccessible(true);
             }
             return (Double) longitudeFld.get(this.location);
         } catch (Exception e) {

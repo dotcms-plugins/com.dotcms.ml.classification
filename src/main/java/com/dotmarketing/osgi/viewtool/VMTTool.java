@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.velocity.tools.view.context.ViewContext;
 import org.apache.velocity.tools.view.tools.ViewTool;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 public class VMTTool implements ViewTool {
     HttpServletRequest request;
     HttpServletResponse response;
@@ -20,7 +22,11 @@ public class VMTTool implements ViewTool {
         this.request = ((ViewContext) initData).getRequest();
         this.response = ((ViewContext) initData).getResponse();
         
-        logger.log(request, response);
+        try {
+            logger.log(request, response);
+        } catch (JsonProcessingException e) {
+            System.err.println("VMTTool:" + e);
+        }
     }
 
 
