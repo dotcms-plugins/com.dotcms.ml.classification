@@ -1,7 +1,9 @@
 Manifest-Version: 1.0
 Export-Package: 
 				org.osgi.service.http.context,
-				org.pmw.*
+				org.pmw.*,
+			
+ 	com.dotcms.repackage.com.maxmind.geoip2.*
 
 			
 Bundle-ClassPath: 
@@ -14,7 +16,7 @@ Bundle-ClassPath:
         
              libs/tinylog-1.3.4.jar
                 
-Bundle-Activator: com.dotmarketing.osgi.servlet.Activator
+Bundle-Activator: com.dotmarketing.osgi.Activator
 Import-Package: 
 					javax.servlet.*,
 					org.osgi.service.http.cont
@@ -23,7 +25,9 @@ Import-Package:
 					com.dotmarketing.util.*,
 					com.dotmarke
  ting.osgi.*,
-					com.dotmarketing.filters.*
+					com.dotmarketing.filters.*,
+					com.dotcms.repacka
+ ge.com.maxmind.geoip2.*
 
 				
 DynamicImport-Package: *

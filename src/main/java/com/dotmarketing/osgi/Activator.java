@@ -12,40 +12,50 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.dotmarketing.osgi.servlet;
+package com.dotmarketing.osgi;
 
-import org.osgi.framework.BundleActivator;
+import com.dotmarketing.osgi.servlet.FilterRegistration;
+import com.dotmarketing.osgi.servlet.VisitorFilter;
+import com.dotmarketing.osgi.viewtool.VMTInfo;
+
+
 import org.osgi.framework.BundleContext;
 
-import com.dotcms.filters.interceptor.FilterWebInterceptorProvider;
-import com.dotcms.filters.interceptor.WebInterceptorDelegate;
-import com.dotmarketing.filters.AutoLoginFilter;
-import com.dotmarketing.util.Config;
-
-public final class Activator implements BundleActivator {
+public final class Activator extends GenericBundleActivator {
 
 
     private FilterRegistration filterReg = new FilterRegistration(new VisitorFilter(), "/");
 
     @Override
     public void start(BundleContext context) throws Exception {
+        
 
+        //Initializing services...
+        initializeServices( context );
+
+        //Registering the ViewTool service
+        registerViewToolService( context, new VMTInfo() );
+        /*
         final FilterWebInterceptorProvider filterWebInterceptorProvider =
                 FilterWebInterceptorProvider.getInstance(Config.CONTEXT);
         final WebInterceptorDelegate delegate = filterWebInterceptorProvider.getDelegate(AutoLoginFilter.class);
 
-        delegate.addFirst(filterReg);
+        delegate.addFirst(filterReg);*/
 
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
+        
+        unregisterViewToolServices();
+        /*
         final FilterWebInterceptorProvider filterWebInterceptorProvider =
                 FilterWebInterceptorProvider.getInstance(Config.CONTEXT);
         final WebInterceptorDelegate delegate = filterWebInterceptorProvider.getDelegate(AutoLoginFilter.class);
         if (null != delegate) {
             delegate.remove(filterReg.getName(), true);
         }
+        */
 
 
 

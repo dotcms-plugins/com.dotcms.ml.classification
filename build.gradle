@@ -28,7 +28,7 @@ dependencies {
 jar {
 	manifest {
 	    attributes (
-			'Bundle-Activator': 'com.dotmarketing.osgi.servlet.Activator',
+			'Bundle-Activator': 'com.dotmarketing.osgi.Activator',
 			'DynamicImport-Package' : '*',
 			'Import-Package': '''
 					javax.servlet.*,
@@ -36,7 +36,8 @@ jar {
 					org.osgi.*,
 					com.dotmarketing.util.*,
 					com.dotmarketing.osgi.*,
-					com.dotmarketing.filters.*
+					com.dotmarketing.filters.*,
+					com.dotcms.repackage.com.maxmind.geoip2.*
 
 				''',
 			'Bundle-ClassPath' :'''
@@ -48,7 +49,8 @@ jar {
                 ''',
 			'Export-Package': '''
 				org.osgi.service.http.context,
-				org.pmw.*
+				org.pmw.*,
+				com.dotcms.repackage.com.maxmind.geoip2.*
 
 			'''
 		)
