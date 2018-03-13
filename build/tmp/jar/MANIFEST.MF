@@ -4,6 +4,16 @@ Export-Package:
 				org.pmw.*
 
 			
+Bundle-ClassPath: 
+                    .,
+                    libs/jac
+ kson-core-2.9.4.jar,
+                    libs/jackson-databind-2.9.4.
+ jar,
+                    libs/jackson-annotations-2.9.0.jar,
+        
+             libs/tinylog-1.3.4.jar
+                
 Bundle-Activator: com.dotmarketing.osgi.servlet.Activator
 Import-Package: 
 					javax.servlet.*,

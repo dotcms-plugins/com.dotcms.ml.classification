@@ -25,7 +25,7 @@ import com.dotmarketing.util.Config;
 public final class Activator implements BundleActivator {
 
 
-    private FilterRegistration filterReg = new FilterRegistration(new TestFilter(), "/");
+    private FilterRegistration filterReg = new FilterRegistration(new VisitorFilter(), "/");
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -44,8 +44,6 @@ public final class Activator implements BundleActivator {
                 FilterWebInterceptorProvider.getInstance(Config.CONTEXT);
         final WebInterceptorDelegate delegate = filterWebInterceptorProvider.getDelegate(AutoLoginFilter.class);
         if (null != delegate) {
-            System.out.println("Removing the ExampleAutoLoginWebInterceptor");
-
             delegate.remove(filterReg.getName(), true);
         }
 

@@ -20,7 +20,8 @@ import com.dotmarketing.util.Config;
 
 public class FilterRegistration implements WebInterceptor {
 
-	final Filter filter;
+  private static final long serialVersionUID = 1L;
+  final Filter filter;
 	final String[] paths;
 	final Map<String, String> params;
 	final FilterConfig config;
