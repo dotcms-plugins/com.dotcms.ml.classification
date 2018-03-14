@@ -2,13 +2,11 @@ package com.dotmarketing.osgi.util;
 
 
 
-import com.dotcms.repackage.com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.dotcms.util.GeoIp2CityDbUtil;
 import com.dotcms.visitor.domain.Visitor;
 
 import com.dotmarketing.portlets.rules.conditionlet.Location;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 

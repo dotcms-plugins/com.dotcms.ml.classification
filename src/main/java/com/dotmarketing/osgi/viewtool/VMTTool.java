@@ -8,7 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.velocity.tools.view.context.ViewContext;
 import org.apache.velocity.tools.view.tools.ViewTool;
-
+/**
+ * Visitor Metric Tool
+ * @author will
+ *
+ */
 public class VMTTool implements ViewTool {
     HttpServletRequest request;
     HttpServletResponse response;

@@ -12,13 +12,17 @@ import com.dotmarketing.portlets.languagesmanager.model.Language;
 import com.dotmarketing.portlets.personas.model.IPersona;
 import com.dotmarketing.util.WebKeys;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -28,6 +32,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Splitter;
+
+import eu.bitwalker.useragentutils.UserAgent;
 
 public class VisitorLogger {
     
@@ -42,7 +48,7 @@ public class VisitorLogger {
         return mapper;
     }
 
-
+    final String UNK="unk";
 
     public void log(final HttpServletRequest request, final HttpServletResponse response) throws JsonProcessingException {
 
@@ -51,10 +57,16 @@ public class VisitorLogger {
             return;
         }
 
-        final Map<String, Object> map = new HashMap<>();
+        final Map<String, Object> map = new LinkedHashMap<>();
         // file or page
-        final Identifier asset = (request.getAttribute("idInode") != null) ? (Identifier) request.getAttribute("idInode")
+        final Object asset = (request.getAttribute("idInode") != null) ?  request.getAttribute("idInode")
                 : (Identifier) request.getAttribute(Constants.CMS_FILTER_IDENTITY);
+        
+        final String assetId = (asset instanceof Identifier) ? ((Identifier)asset).getId() : 
+            (asset !=null && asset instanceof String) ?
+                    (String) asset :UNK;
+        
+        
 
         final Optional<String> content = Optional.ofNullable((String) request.getAttribute(WebKeys.WIKI_CONTENTLET));
 
@@ -62,26 +74,34 @@ public class VisitorLogger {
         final Visitor visitor = new VisitorAPIImpl().getVisitor(request).get();
         final GeolocationProvider geo = new GeoIp2Geolocation(visitor);
         final IPersona persona = visitor.getPersona();
-        final String dmid = (visitor.getDmid()==null) ? "ukn" : visitor.getDmid().toString();
+        final String dmid = (visitor.getDmid()==null) ? UNK: visitor.getDmid().toString();
         final String device = visitor.getDevice();
-        final String agent = request.getHeader("user-agent");
+
         final List<AccruedTag> tags = visitor.getTags();
         final Map<String, String> params = (request.getQueryString()!=null) ?  Splitter.on('&').trimResults().withKeyValueSeparator("=").split(request.getQueryString()) : Collections.emptyMap();
 
+        final UserAgent agent = visitor.getUserAgent();
+        final String sessionId = request.getSession().getId();
+        
 
 
 
+        Map<String, String> cookies = Arrays.asList(request.getCookies()).stream().collect(Collectors.toMap(from ->from.getName(),from -> from.getValue()));
+        map.put("response", response.getStatus());
+        map.put("sessionId", sessionId);
         map.put("ts", System.currentTimeMillis());
         map.put("ip", request.getRemoteHost());
         map.put("request", request.getRequestURI());
-        map.put("query", params);
+        map.put("query", request.getParameterMap());
         map.put("referer", request.getHeader("referer"));
         map.put("host", request.getHeader("host"));
-        map.put("assetId", (asset != null) ? asset.getId() : "ukn");
-        map.put("contentId", content.orElse("ukn"));
+        map.put("assetId", assetId);
+        map.put("contentId", content.orElse(UNK));
         map.put("device", device);
         map.put("agent", agent);
-        map.put("persona", (persona != null) ? persona.getKeyTag() : "ukn");
+        map.put("userAgent", request.getHeader("user-agent"));
+        map.put("cookies", cookies);
+        map.put("persona", (persona != null) ? persona.getKeyTag() : UNK);
         map.put("city", geo.getCity());
         map.put("country", geo.getCountryCode());
         map.put("lang", lang.toString());

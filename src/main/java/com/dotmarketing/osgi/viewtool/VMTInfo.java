@@ -3,6 +3,11 @@ package com.dotmarketing.osgi.viewtool;
 import org.apache.velocity.tools.view.context.ViewContext;
 import org.apache.velocity.tools.view.servlet.ServletToolInfo;
 
+/**
+ * Visitor Metric Tool
+ * @author will
+ *
+ */
 public class VMTInfo extends ServletToolInfo {
 
     
