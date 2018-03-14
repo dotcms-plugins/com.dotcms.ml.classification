@@ -62,7 +62,7 @@ public class VisitorLogger {
         final Visitor visitor = new VisitorAPIImpl().getVisitor(request).get();
         final GeolocationProvider geo = new GeoIp2Geolocation(visitor);
         final IPersona persona = visitor.getPersona();
-        final UUID dmid = visitor.getDmid();
+        final String dmid = (visitor.getDmid()==null) ? "ukn" : visitor.getDmid().toString();
         final String device = visitor.getDevice();
         final String agent = request.getHeader("user-agent");
         final List<AccruedTag> tags = visitor.getTags();
@@ -72,6 +72,7 @@ public class VisitorLogger {
 
 
         map.put("ts", System.currentTimeMillis());
+        map.put("ip", request.getRemoteHost());
         map.put("request", request.getRequestURI());
         map.put("query", params);
         map.put("referer", request.getHeader("referer"));
@@ -84,7 +85,7 @@ public class VisitorLogger {
         map.put("city", geo.getCity());
         map.put("country", geo.getCountryCode());
         map.put("lang", lang.toString());
-        map.put("dmid", dmid.toString());
+        map.put("dmid", dmid);
         map.put("latLong", geo.getLatLong());
         map.put("tags", tags);
         map.put("params", params);
